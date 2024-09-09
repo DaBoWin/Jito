@@ -8,7 +8,13 @@ import json
 import re
 
 async def load_config(filename='config.json'):
-    with open(filename, 'r', encoding='utf-8') as f:
+    # 获取当前工作目录
+    current_dir = os.getcwd()
+    # 拼接当前目录下的配置文件路径
+    config_path = os.path.join(current_dir, filename)
+    
+    # 打开并读取 config.json
+    with open(config_path, 'r', encoding='utf-8') as f:
         return json.load(f)
 
 async def check_stock(url, out_of_stock_text):
