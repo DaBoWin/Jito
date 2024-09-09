@@ -34,7 +34,7 @@ pip install aiohttp beautifulsoup4 python-telegram-bot
     "telegram_chat_id": "你的tg频道ID，注意机器人要加入频道并且是管理员"
 ```
 
-## 商家监控配置JSON的具体说明
+## 商家监控配置JSON以dmit商家举例说明，其他商家请自行添加相关配置
 
 ### 商家信息
 
