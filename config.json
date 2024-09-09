@@ -1,0 +1,49 @@
+{
+    "telegram_token": "你的tg机器人api token",
+    "telegram_chat_id": "你的tg频道ID，注意机器人要加入频道并且是管理员",
+    "merchants": [
+        {
+            "name": "DMIT",
+            "tag": "#dmit",
+            "review_content": "商家评论：大妈",
+            "out_of_stock_text": "Out of Stock",
+            "stock_urls": [
+                {
+                    "url": "https://www.dmit.io/cart.php?a=add&pid=197",
+                    "title": "HKG.T1.WEE（国际优化线路, 非国内优化）",
+                    "price": "$36.90 USD 每年",
+                    "hardware_info": "HKG.T1.WEE\n1 vCPU1.0 GB RAM\n20G SSD\nStorage1000GB Transfer Max(IN, OUT)\n1 IPv4 & 1 IPv6 /64",
+                    "stock_url_text": "点击购买或长按复制"
+                }
+            ],
+            "coupon_monthly": "",
+            "coupon_annual": ""
+        },
+        {
+            "name": "碳云",
+            "tag": "#coalcloud",
+            "review_content": "商家评论：煤老板",
+            "out_of_stock_text": "缺货",
+            "stock_urls": [
+                {
+                    "url": "https://www.coalcloud.net/cart.php?a=add&pid=247",
+                    "title": "SG BGP LITE Tall Preorder (第二期)",
+                    "price": "¥150.00CNY 每年",
+                    "hardware_info": "1 vCpu\n1024MB 内存\n20G 硬盘\n1Gbps 带宽\n2000G 流量\n1 IPv4 + 1 IPv6",
+                    "stock_url_text": "点击购买或长按复制"
+                },
+                {
+                    "url": "https://www.coalcloud.net/cart.php?a=add&pid=248",
+                    "title": "SGBGP LITE V1 Short Preorder (第三期)",
+                    "price": "¥75.00CNY 每年",
+                    "hardware_info": "1 vCpu\n512MB 内存\n5G硬盘\n500Mbps带宽\n500G流量\n1IPv4+1IPv6",
+                    "stock_url_text": "点击购买或长按复制"
+                }
+            ],
+            "coupon_monthly": "",
+            "coupon_annual": ""
+        }
+    ],
+    "check_interval": 60,
+    "cooldown_period": 86400
+}
