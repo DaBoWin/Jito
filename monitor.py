@@ -46,9 +46,10 @@ async def send_notification(config, merchant, stock):
     # 构建优惠信息部分
     coupon_info = ""
     if merchant.get('coupon_monthly'):
-        coupon_info += f"Monthly - Use coupon code {merchant['coupon_monthly']}\n"
+        coupon_info += f"Monthly - Use coupon code `{merchant['coupon_monthly']}`\n"
     if merchant.get('coupon_annual'):
-        coupon_info += f"Annual - Use coupon code {merchant['coupon_annual']}\n"
+        coupon_info += f"Annual - Use coupon code `{merchant['coupon_annual']}`\n"
+
 
     message = (
         f"{title}\n"
