@@ -7,13 +7,28 @@ from datetime import datetime, timedelta
 import os
 import json
 import re
+import sqlite3
+
+conn = sqlite3.connect('instock_notifications.db')  # For in-memory DB, replace with 'notifications.db' for a file-based DB
+c = conn.cursor()
+
+# Create a table to store message information
+c.execute('''
+CREATE TABLE IF NOT EXISTS notifications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    stock_url TEXT,
+    message_id INTEGER,
+    message TEXT
+)
+''')
+conn.commit()
 
 async def load_config(filename='config.json'):
     # 获取当前工作目录
     current_dir = os.getcwd()
     # 拼接当前目录下的配置文件路径
     config_path = os.path.join(current_dir, filename)
-    
+
     # 打开并读取 config.json
     with open(config_path, 'r', encoding='utf-8') as f:
         return json.load(f)
@@ -31,7 +46,7 @@ async def check_stock(url, out_of_stock_text):
     except Exception as e:
         print(f"检查库存时出错: {e}")
         return False
-    
+
 # Markdown 需要转义的特殊字符
 def escape_markdown(text):
     return re.sub(r'([_*[\]()])', r'\\\1', text)
@@ -72,15 +87,69 @@ async def send_notification(config, merchant, stock):
 
     bot = Bot(token=config['telegram_token'])
     try:
-        await bot.send_message(
+        sent_message = await bot.send_message(
             chat_id=config['telegram_chat_id'],
             text= message,
             parse_mode=ParseMode.MARKDOWN
         )
+
+        message_id = sent_message.message_id
+        c.execute('''
+        SELECT id FROM notifications WHERE stock_url = ?
+        ''', (url,))
+
+        record = c.fetchone()
+
+        if record:
+            c.execute('''
+            UPDATE notifications
+            SET message_id = ?, message = ?
+            WHERE stock_url = ?
+            ''', (message_id, message, url))
+            print(f"Record with stock_url {url} has been updated.")
+        else:
+            c.execute('''
+            INSERT INTO notifications (stock_url, message_id, message)
+            VALUES (?, ?, ?)
+            ''', (url, message_id, message))
+            print(f"New record with stock_url {url} has been inserted.")
+
+        conn.commit()
+        print(f"发送成功")
     except Exception as e:
         print(f"Error: {e}")
 
-    print(f"发送成功")
+async def edit_message(config, url):
+    bot = Bot(token=config['telegram_token'])
+    try:
+        c.execute('''
+        SELECT message, message_id FROM notifications WHERE stock_url = ?
+        ''', (url,))
+
+        # Fetch the result
+        record = c.fetchone()
+
+        if record:
+            message, message_id = record
+            updated_message = message.replace("Stock: 有", "Stock: 无")
+
+            await bot.edit_message_text(
+                message_id=message_id,
+                text=updated_message,
+                parse_mode=ParseMode.MARKDOWN
+            )
+            print(f"更新成功")
+            c.execute('''
+            DELETE FROM notifications WHERE stock_url = ?
+            ''', (url,))
+
+            conn.commit()
+        else:
+            print("No message found with this stock_url.")
+        
+    except Exception as e:
+        print(f"Error: {e}")
+
 
 async def main():
     config = await load_config()
@@ -104,7 +173,7 @@ async def main():
 
                 in_stock = await check_stock(url, out_of_stock_text)
                 print(f"开始检查url: {in_stock}")
-                
+
                 if in_stock and not merchant_status.get(merchant['name'], {}).get(url, {'in_stock': False})['in_stock']:
                     print(f"有库存")
                     await send_notification(config, merchant, stock)
@@ -112,6 +181,7 @@ async def main():
                     merchant_status[merchant['name']]['next_check_time'] = datetime.now() + timedelta(seconds=cooldown_period)
                 elif not in_stock:
                     print(f"没有库存")
+                    await edit_message(config, url)
                     merchant_status.setdefault(merchant['name'], {})[url] = {'in_stock': False}
                     merchant_status[merchant['name']]['next_check_time'] = datetime.now() + timedelta(seconds=check_interval)
             print(f"结束检查商家: {merchant['name']}")
